@@ -1,20 +1,22 @@
 // import { useRef } from "react";
-import { useState } from "react";
+// import { useState } from "react";
 import Input from "./Input";
+import { isEmail, isNotEmpty, hasMinLength } from '../util/validation,js'
+import { useInput } from "../hooks/useInput";
 
 export default function StateLogin() {
   
   // const [enteredEmail, setEnterredEmail] = useState('');
   // const [enteredPassword, setEnterredPassword] = useState('');
 
-  const [enteredValues, setEnterredValues] = useState({
-    email: '', 
-    password: '',
-  })
-  const [didEdit, setDidEdit] = useState({
-    email: false,
-    password: false,
-  })
+  // const [enteredValues, setEnterredValues] = useState({
+  //   email: '', 
+  //   password: '',
+  // })
+  // const [didEdit, setDidEdit] = useState({
+  //   email: false,
+  //   password: false,
+  // })
 
   // function handleEmailChange(event){
   //   setEnterredEmail(event.target.value);
@@ -24,31 +26,23 @@ export default function StateLogin() {
   //   setEnterredPassword(event.target.value);
   // }
 
-  function handleInputChange(identifier, value) {
-    setEnterredValues(prevValues => ({
-      ...prevValues,
-      [identifier]: value,
-    }))
+  const {value: emailValue, 
+    handleInputBlur: handleEmailBlur, handleInputChange:handleEmailInput, 
+    hasError: emailHasError,
+  } = useInput('', (value) => {
+    return isEmail(value) && isNotEmpty(value);
+  });
 
-    setDidEdit(prevEdit => ({
-      ...prevEdit, 
-      [identifier]: false,
-    }))
-  } 
-
-
-  // const email = useRef();
-  // const password = useRef();
-  function handleInputBlur(identifier) {
-    setDidEdit(prevEdit => ({
-      ...prevEdit,
-      [identifier]: true,
-    }))
-  }
+  const {value: passwordValue, 
+    handleInputBlur: handlePasswordBlur, handleInputChange:handlePasswordInput,
+    hasError: passwordHasError
+   } = useInput('', (value) => {
+    return hasMinLength(value, 8);
+  });
 
 
-  const emailIsInvalid = didEdit.email && !enteredValues.email.includes('@');
-  const passwordIsInvalid = didEdit.password && enteredValues.password.trim().length < 6;
+  // const emailIsInvalid = didEdit.email && !isEmail(enteredValues.email) && !isNotEmpty(enteredValues.email);
+  // const passwordIsInvalid = didEdit.password && !hasMinLength(enteredValues.password, 8) ;
   
   
   function handleSubmit(event) {
@@ -56,7 +50,9 @@ export default function StateLogin() {
     // const enteredEmail = email.current.value;
     // const enteredPassword = password.current.value;
 
-
+    if(emailHasError || passwordHasError){
+      return;
+    }
   }
 
 
@@ -66,16 +62,16 @@ export default function StateLogin() {
 
       <div className="control-row">
         <Input label='Email' id='email' name='email' type='email' 
-        onBlur={() => handleInputBlur('email')} 
-        onChange={(event) => handleInputChange('email', event.target.value)}
-        value={enteredValues.email}
-        error={emailIsInvalid && 'Please enter a valid email!'}/>
+        onBlur={handleEmailBlur} 
+        onChange={handleEmailInput}
+        value={emailValue}
+        error={emailHasError && 'Please enter a valid email!'}/>
 
         <Input label='Password' id='password' name='password' type='password' 
-        onBlur={() => handleInputBlur('password')} 
-        onChange={(event) => handleInputChange('password', event.target.value)}
-        value={enteredValues.password}
-        error={passwordIsInvalid && 'Please enter a valid password!'}/>
+        onBlur={handlePasswordBlur} 
+        onChange={handlePasswordInput}
+        value={passwordValue}
+        error={passwordHasError && 'Please enter a valid password!'}/>
       </div>
 
       <p className="form-actions">
